@@ -3,7 +3,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 
-public class Movement extends JPanel implements Runnable, KeyListener {
+public class Game extends JPanel implements Runnable, KeyListener {
 
     private final Image shipImg;
     private int x = 100, y = 100;
@@ -12,8 +12,10 @@ public class Movement extends JPanel implements Runnable, KeyListener {
     ArrayList<Bullet> bullets = new ArrayList<>();
     ArrayList<Enemy> enemies = new ArrayList<>();
     double enemySpawnTimer = 0;
+    int score = 0;
+    boolean gameOver = false;
 
-    public Movement() {
+    public Game() {
         shipImg = Toolkit.getDefaultToolkit().getImage("src/Sprites/ship.png");
         setPreferredSize(new Dimension(1000, 500));
         setFocusable(true);
@@ -43,27 +45,26 @@ public class Movement extends JPanel implements Runnable, KeyListener {
     }
 
     public void update(double delta) {
+        if (gameOver) return;
+
+        // Player movement
         if (up) y -= speed * delta;
         if (down) y += speed * delta;
         if (left) x -= speed * delta;
         if (right) x += speed * delta;
 
-        int spriteSize = 50;
-        int panelWidth = getWidth();
-        int panelHeight = getHeight();
-
         x = Math.max(0, Math.min(x, getWidth() - 50));
         y = Math.max(0, Math.min(y, getHeight() - 50));
 
+        // Bullets
         for (int i = 0; i < bullets.size(); i++) {
             bullets.get(i).update(delta);
             if (bullets.get(i).isOffScreen(getHeight())) {
-                bullets.remove(i);
-                i--;
+                bullets.remove(i--);
             }
         }
 
-        //spawner
+        // Enemy spawner
         enemySpawnTimer -= delta;
         if (enemySpawnTimer <= 0) {
             enemySpawnTimer = 2 + Math.random();
@@ -71,6 +72,7 @@ public class Movement extends JPanel implements Runnable, KeyListener {
             enemies.add(new Enemy(1000, spawnY));
         }
 
+        // Enemies
         for (int i = 0; i < enemies.size(); i++) {
             Enemy enemy = enemies.get(i);
             enemy.update(delta);
@@ -80,21 +82,25 @@ public class Movement extends JPanel implements Runnable, KeyListener {
                 continue;
             }
 
+            // Enemy hit by player bullet
             for (int j = 0; j < bullets.size(); j++) {
                 if (enemy.isHitBy(bullets.get(j))) {
                     bullets.remove(j--);
                     enemies.remove(i--);
+                    score += 100;
                     break;
                 }
             }
         }
 
+        // Check if player was hit
+        Rectangle playerBounds = new Rectangle(x, y, 50, 50);
         for (Enemy enemy : enemies) {
             for (Bullet b : enemy.bullets) {
-                Rectangle playerBounds = new Rectangle(x, y, 50, 50);
                 Rectangle bulletBounds = new Rectangle((int)b.x, (int)b.y, 5, 10);
                 if (playerBounds.intersects(bulletBounds)) {
-                    System.out.println("Player hit!");
+                    gameOver = true;
+                    return;
                 }
             }
         }
@@ -113,6 +119,24 @@ public class Movement extends JPanel implements Runnable, KeyListener {
         for (Enemy e : enemies) {
             e.draw(g);
         }
+        //score
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+        g.drawString("Score: " + score, 10, 25);
+        //display message
+        if (gameOver) {
+            g.setColor(new Color(0, 0, 0, 200));
+            g.fillRect(0, 0, getWidth(), getHeight());
+
+            g.setColor(Color.RED);
+            g.setFont(new Font("Arial", Font.BOLD, 40));
+            g.drawString("GAME OVER", getWidth() / 2 - 130, getHeight() / 2 - 40);
+
+            g.setFont(new Font("Arial", Font.PLAIN, 20));
+            g.setColor(Color.WHITE);
+            g.drawString("Press R to Restart", getWidth() / 2 - 90, getHeight() / 2);
+            g.drawString("Press Q to Quit", getWidth() / 2 - 75, getHeight() / 2 + 30);
+        }
     }
 
 
@@ -128,6 +152,14 @@ public class Movement extends JPanel implements Runnable, KeyListener {
                 bullets.add(new Bullet(x + 20, y+45, true));
             }
         }
+        if (gameOver) {
+            if (e.getKeyCode() == KeyEvent.VK_R) {
+                restartGame();
+            } else if (e.getKeyCode() == KeyEvent.VK_Q) {
+                System.exit(0);
+            }
+            return;
+        }
     }
 
     @Override
@@ -138,6 +170,15 @@ public class Movement extends JPanel implements Runnable, KeyListener {
             case KeyEvent.VK_A -> left = false;
             case KeyEvent.VK_D -> right = false;
         }
+    }
+
+    private void restartGame() {
+        x = 100;
+        y = 300;
+        bullets.clear();
+        enemies.clear();
+        score = 0;
+        gameOver = false;
     }
 
     @Override

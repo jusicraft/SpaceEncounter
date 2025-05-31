@@ -3,7 +3,7 @@ import javax.swing.*;
 public class Main {
     public static void main(String[] args) {
         JFrame frame = new JFrame("WSAD Sprite Movement");
-        Movement gamePanel = new Movement();
+        Game gamePanel = new Game();
 
         frame.add(gamePanel);
         frame.pack();
