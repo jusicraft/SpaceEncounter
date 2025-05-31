@@ -3,14 +3,16 @@ import java.awt.*;
 class Bullet {
     double x, y;
     double speed = 600;
+    boolean direction;
 
-    public Bullet(double x, double y) {
+    public Bullet(double x, double y, boolean direction) {
         this.x = x;
         this.y = y;
+        this.direction = direction;
     }
 
     public void update(double delta) {
-        x += speed * delta;
+        x += (direction ? 1 : -1) * speed * delta;
     }
 
     public boolean isOffScreen(int height) {

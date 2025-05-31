@@ -10,6 +10,8 @@ public class Movement extends JPanel implements Runnable, KeyListener {
     private double speed = 300;
     private boolean up, down, left, right;
     ArrayList<Bullet> bullets = new ArrayList<>();
+    ArrayList<Enemy> enemies = new ArrayList<>();
+    double enemySpawnTimer = 0;
 
     public Movement() {
         shipImg = Toolkit.getDefaultToolkit().getImage("src/Sprites/ship.png");
@@ -60,6 +62,42 @@ public class Movement extends JPanel implements Runnable, KeyListener {
                 i--;
             }
         }
+
+        //spawner
+        enemySpawnTimer -= delta;
+        if (enemySpawnTimer <= 0) {
+            enemySpawnTimer = 2 + Math.random();
+            double spawnY = Math.random() * (getHeight() - 50);
+            enemies.add(new Enemy(1000, spawnY));
+        }
+
+        for (int i = 0; i < enemies.size(); i++) {
+            Enemy enemy = enemies.get(i);
+            enemy.update(delta);
+
+            if (enemy.isOffScreen()) {
+                enemies.remove(i--);
+                continue;
+            }
+
+            for (int j = 0; j < bullets.size(); j++) {
+                if (enemy.isHitBy(bullets.get(j))) {
+                    bullets.remove(j--);
+                    enemies.remove(i--);
+                    break;
+                }
+            }
+        }
+
+        for (Enemy enemy : enemies) {
+            for (Bullet b : enemy.bullets) {
+                Rectangle playerBounds = new Rectangle(x, y, 50, 50);
+                Rectangle bulletBounds = new Rectangle((int)b.x, (int)b.y, 5, 10);
+                if (playerBounds.intersects(bulletBounds)) {
+                    System.out.println("Player hit!");
+                }
+            }
+        }
     }
 
     @Override
@@ -71,6 +109,10 @@ public class Movement extends JPanel implements Runnable, KeyListener {
         }
         //player
         g.drawImage(shipImg, x, y, 50, 50, this);
+        //enemy
+        for (Enemy e : enemies) {
+            e.draw(g);
+        }
     }
 
 
@@ -82,8 +124,8 @@ public class Movement extends JPanel implements Runnable, KeyListener {
             case KeyEvent.VK_A -> left = true;
             case KeyEvent.VK_D -> right = true;
             case KeyEvent.VK_SPACE -> {
-                bullets.add(new Bullet(x + 20, y));
-                bullets.add(new Bullet(x + 20, y+45));
+                bullets.add(new Bullet(x + 20, y, true));
+                bullets.add(new Bullet(x + 20, y+45, true));
             }
         }
     }
