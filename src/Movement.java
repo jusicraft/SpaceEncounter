@@ -1,14 +1,18 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 
 public class Movement extends JPanel implements Runnable, KeyListener {
 
+    private final Image shipImg;
     private int x = 100, y = 100;
     private double speed = 300;
     private boolean up, down, left, right;
+    ArrayList<Bullet> bullets = new ArrayList<>();
 
     public Movement() {
+        shipImg = Toolkit.getDefaultToolkit().getImage("src/Sprites/ship.png");
         setPreferredSize(new Dimension(1000, 500));
         setFocusable(true);
         setBackground(Color.BLACK);
@@ -48,14 +52,27 @@ public class Movement extends JPanel implements Runnable, KeyListener {
 
         x = Math.max(0, Math.min(x, getWidth() - 50));
         y = Math.max(0, Math.min(y, getHeight() - 50));
+
+        for (int i = 0; i < bullets.size(); i++) {
+            bullets.get(i).update(delta);
+            if (bullets.get(i).isOffScreen(getHeight())) {
+                bullets.remove(i);
+                i--;
+            }
+        }
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Image img = Toolkit.getDefaultToolkit().getImage("src/Sprites/ship.png");
-        g.drawImage(img, x, y, 50, 50, this);
+        //bullets
+        for (Bullet b : bullets) {
+            b.draw(g);
+        }
+        //player
+        g.drawImage(shipImg, x, y, 50, 50, this);
     }
+
 
     @Override
     public void keyPressed(KeyEvent e) {
@@ -64,6 +81,10 @@ public class Movement extends JPanel implements Runnable, KeyListener {
             case KeyEvent.VK_S -> down = true;
             case KeyEvent.VK_A -> left = true;
             case KeyEvent.VK_D -> right = true;
+            case KeyEvent.VK_SPACE -> {
+                bullets.add(new Bullet(x + 20, y));
+                bullets.add(new Bullet(x + 20, y+45));
+            }
         }
     }
 
