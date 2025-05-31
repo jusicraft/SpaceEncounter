@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Space Encounter:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Space_Encounter_jar</output-path>
+    <root id="archive" name="Space Encounter.jar">
+      <element id="module-output" name="Space Encounter" />
+    </root>
+  </artifact>
+</component>
