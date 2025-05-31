@@ -1,7 +1,9 @@
+package Entity;
+
 import java.awt.*;
 import java.util.ArrayList;
 
-class Enemy {
+public class Enemy {
     double x, y;
     int width = 50, height = 50;
     double speed = 100; // moves left
@@ -46,6 +48,10 @@ class Enemy {
 
     public boolean isOffScreen() {
         return x + width < 0;
+    }
+
+    public ArrayList<Bullet> getBullets() {
+        return bullets;
     }
 }
 

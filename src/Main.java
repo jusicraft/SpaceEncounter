@@ -1,3 +1,5 @@
+import Game.Game;
+
 import javax.swing.*;
 
 public class Main {

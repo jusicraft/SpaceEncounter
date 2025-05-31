@@ -1,6 +1,8 @@
+package Entity;
+
 import java.awt.*;
 
-class Bullet {
+public class Bullet {
     double x, y;
     double speed = 600;
     boolean direction;
@@ -22,6 +24,13 @@ class Bullet {
     public void draw(Graphics g) {
         g.setColor(Color.WHITE);
         g.fillRect((int)x, (int)y, 20, 5);
+    }
+
+    public double getX() {
+        return x;
+    }
+    public double getY() {
+        return y;
     }
 }
 
